@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Météo Direct</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        /* CSS INTERNE - Tout le design est ici */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #74ebd5, #ACB6E5);
+            height: 100vh; /* Prend toute la hauteur de l'écran */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            color: #333;
+        }
+
+        .card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        h1 { margin: 0 0 1.5rem 0; font-size: 1.8rem; color: #2c3e50; }
+
+        .search-box { display: flex; gap: 10px; margin-bottom: 2rem; }
+
+        input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #eee;
+            border-radius: 50px;
+            outline: none;
+            font-size: 1rem;
+            text-align: center;
+            transition: 0.3s;
+        }
+        input:focus { border-color: #74ebd5; }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            background: #2c3e50;
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 1.2rem;
+        }
+
+        button:hover { background: #34495e; transform: scale(1.05); }
+
+        /* Zone d'affichage météo */
+        .weather-info { display: none; animation: fadeIn 0.5s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .city-title { font-size: 1.5rem; color: #333; margin-bottom: 5px; }
+        
+        .temp { font-size: 4rem; font-weight: 600; margin: 10px 0; color: #2c3e50; }
+        
+        .desc { text-transform: capitalize; color: #7f8c8d; font-size: 1.1rem; }
+        
+        .icon { width: 120px; height: 120px; }
+        
+        .details {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-around;
+            color: #666;
+        }
+
+        .error { color: #e74c3c; margin-top: 15px; display: none; font-weight: 600; }
+        
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>Météo en Direct 🌤️</h1>
+        
+        <div class="search-box">
+            <input type="text" id="cityInput" placeholder="Ville (ex: Lyon)">
+            <button onclick="getWeather()">🔍</button>
+        </div>
+
+        <p class="error" id="errorMessage">Oups ! Ville introuvable.</p>
+
+        <div class="weather-info" id="weatherInfo">
+            <h2 class="city-title" id="cityName">Paris, FR</h2>
+            <img id="weatherIcon" class="icon" src="" alt="Icône météo">
+            <div class="temp" id="temp">22°c</div>
+            <div class="desc" id="description">Ciel dégagé</div>
+            
+            <div class="details">
+                <div>💧 <span id="humidity">50</span>%</div>
+                <div>💨 <span id="wind">10</span> km/h</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        // Colle ta clé API OpenWeatherMap ici entre les guillemets
+        const apiKey = "cec9b3fc3c8d3878e684c9c3e21c1c77"; 
+
+        // --- LOGIQUE ---
+        async function getWeather() {
+            const city = document.getElementById('cityInput').value;
+            const errorMsg = document.getElementById('errorMessage');
+            const weatherDiv = document.getElementById('weatherInfo');
+
+            if (!city) return; // Ne rien faire si champ vide
+
+            // Appel API
+            const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric&lang=fr`;
+
+            try {
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error("Ville non trouvée");
+                }
+
+                const data = await response.json();
+
+                // Mise à jour de l'interface
+                document.getElementById('cityName').innerText = `${data.name}, ${data.sys.country}`;
+                document.getElementById('temp').innerText = Math.round(data.main.temp) + "°";
+                document.getElementById('description').innerText = data.weather[0].description;
+                document.getElementById('humidity').innerText = data.main.humidity;
+                document.getElementById('wind').innerText = Math.round(data.wind.speed * 3.6); // Conversion m/s en km/h
+                
+                // Icône
+                const iconCode = data.weather[0].icon;
+                document.getElementById('weatherIcon').src = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
+
+                // Affichage
+                errorMsg.style.display = "none";
+                weatherDiv.style.display = "block";
+
+            } catch (error) {
+                console.error(error);
+                weatherDiv.style.display = "none";
+                errorMsg.style.display = "block";
+            }
+        }
+
+        // Permet de lancer la recherche en appuyant sur "Entrée"
+        document.getElementById("cityInput").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                getWeather();
+            }
+        });
+    </script>
+
+</body>
+</html>
