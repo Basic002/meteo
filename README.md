@@ -16,7 +16,7 @@ Ce projet a été réalisé pour mettre en pratique la consommation d'API REST a
 
 ## 📦 Comment tester ?
 Le projet est accessible directement en ligne ici :
-👉 **[LIEN_DE_TON_SITE_ICI]**
+👉 https://basic002.github.io/meteo/
 
 Sinon, vous pouvez cloner le dépôt :
 ```bash
